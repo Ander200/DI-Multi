@@ -90,6 +90,15 @@ fun ToolBar() {
                 Text(
                     text = "About Me",
                     fontSize = 20.sp,
+                    modifier = Modifier
+                        .clickable {
+                            val webIntent = Intent(Intent.ACTION_VIEW).apply {
+                                data = Uri.parse("https://www.google.com") // La URL que se quiere abrir
+                            }
+
+                            // Iniciar el intent para abrir el navegador
+                            context.startActivity(webIntent)
+                        }
                 )
                 Image(
                     painter = painterResource(id = R.drawable.baseline_share_24),
@@ -101,7 +110,7 @@ fun ToolBar() {
                             val shareIntent = Intent(Intent.ACTION_SEND).apply {
                                 type = "text/plain" // Tipo de dato que se va a compartir
                                 putExtra(Intent.EXTRA_SUBJECT, "Mira mi sitio web")
-                                putExtra(Intent.EXTRA_TEXT, "https://www.github.com") // El contenido a compartir
+                                putExtra(Intent.EXTRA_TEXT, "https://www.misitio.com") // El contenido a compartir
                             }
 
                             // Crear un chooser para mostrar las opciones disponibles de aplicaciones para compartir
