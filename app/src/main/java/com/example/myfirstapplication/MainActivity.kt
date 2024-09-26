@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,7 +28,10 @@ import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Home
@@ -45,6 +49,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +59,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -63,10 +69,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.myfirstapplication.ui.theme.MyFirstApplicationTheme
 import kotlinx.coroutines.launch
@@ -79,6 +88,29 @@ class MainActivity : ComponentActivity() {
             ViewApp()
         }
     }
+}
+
+class GalleryViewModel : ViewModel() {
+    // Controla si la galería se muestra en una o dos columnas
+    var isSingleColumn = mutableStateOf(false)
+
+    // Lista de obras de arte
+    var artworks = mutableStateOf(sampleArtworks())
+}
+
+data class Artwork(
+    val name: String,
+    val title: String,
+    val description: String,
+    val creationDate: String,
+    val style: ArtworkStyle,  // Enum que define el estilo de arte
+    val imageResId: Int // ID del recurso de la imagen (JPG)
+)
+
+enum class ArtworkStyle {
+    WATERCOLOUR,  // Acuarela
+    DIGITAL,      // Arte digital
+    INK           // Tinta
 }
 
 @Composable
@@ -135,8 +167,14 @@ fun BottomNavBar(navController: NavHostController) {
 @Composable
 fun ViewApp() {
     val navController = rememberNavController()
+    val galleryViewModel : GalleryViewModel = viewModel()
+    navController.currentBackStackEntryAsState().value?.destination
     Scaffold (
-        topBar =  {ToolBar()},
+        topBar = {when(navController.currentDestination?.route) {
+                    "gallery" -> GalleryTopBar(galleryViewModel.isSingleColumn.value)
+                    else -> ToolBar()
+                }}
+        ,
         floatingActionButton = {LikesBtn()},
         floatingActionButtonPosition = FabPosition.End,
         bottomBar =  { BottomNavBar(navController) },
@@ -145,7 +183,7 @@ fun ViewApp() {
             NavHost(navController = navController, startDestination = "info") {
                 composable("home") { HomeScreen(innerPadding, navController) }
                 composable("info") { InfoScreen(innerPadding, navController) }
-                composable("gallery") { GalleryScreen(innerPadding, navController) }
+                composable("gallery") { GalleryScreen(innerPadding, navController, galleryViewModel) }
                 composable("settings") { SettingsScreen(innerPadding, navController) }
             }
     }
@@ -153,11 +191,18 @@ fun ViewApp() {
 
 @Composable
 fun HomeScreen(innerPadding: PaddingValues, navController: NavController) {
-    Text(
+    Box(
         modifier = Modifier
-            .padding(innerPadding),
-        text = "Home"
-    )
+            .fillMaxSize()
+            .background(color = Color.DarkGray)
+    ) {
+        Text(
+            modifier = Modifier
+                .padding(innerPadding),
+            text = "Home",
+            color = Color.White
+        )
+    }
 }
 
 @Composable
@@ -166,21 +211,130 @@ fun InfoScreen(innerPadding: PaddingValues, navController: NavController) {
 }
 
 @Composable
-fun GalleryScreen(innerPadding: PaddingValues, navController: NavController) {
-    Text(
-        modifier = Modifier
-            .padding(innerPadding),
-        text = "Gallery"
-    )
+fun GalleryScreen(innerPadding: PaddingValues, navController: NavController, galleryViewModel : GalleryViewModel) {
+    GalleryContent(innerPadding, galleryViewModel.isSingleColumn, galleryViewModel.artworks.value)
 }
 
 @Composable
 fun SettingsScreen(innerPadding: PaddingValues, navController: NavController) {
-    Text(
+    Box(
         modifier = Modifier
-            .padding(innerPadding),
-        text = "Settings"
+            .fillMaxSize()
+            .background(color = Color.DarkGray)
+    ) {
+        Text(
+            modifier = Modifier
+                .padding(innerPadding),
+            text = "Settings",
+            color = Color.White
+        )
+    }
+}
+
+fun sampleArtworks() : List<Artwork>{
+    return listOf(
+        Artwork(
+            name = "test1",
+            title = "title",
+            description = "",
+            creationDate = "",
+            style = ArtworkStyle.WATERCOLOUR,
+            imageResId = 1
+        ),
+        Artwork(
+            name = "test2",
+            title = "title2",
+            description = "",
+            creationDate = "",
+            style = ArtworkStyle.INK,
+            imageResId = 1
+        ),
+        Artwork(
+            name = "test3",
+            title = "title3",
+            description = "",
+            creationDate = "",
+            style = ArtworkStyle.DIGITAL,
+            imageResId = 1
+        )
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GalleryTopBar(singleColumn: Boolean) {
+    val context = LocalContext.current
+    TopAppBar(
+        title = {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = "Galeria",
+                    fontSize = 20.sp,
+                    modifier = Modifier
+                        .clickable {
+                            val webIntent = Intent(Intent.ACTION_VIEW).apply {
+                                data = Uri.parse("https://www.google.com")
+                            }
+
+                            // Iniciar el intent para abrir el navegador
+                            context.startActivity(webIntent)
+                        }
+                )
+                if (singleColumn == true) {
+                    Image(
+                        painter = painterResource(id = R.drawable.baseline_2_columns),
+                        contentDescription = "accesibilidad",
+                        modifier = Modifier
+                            .padding(end = 20.dp)
+                            .size(40.dp)
+                            .clickable(onClick = {
+                                singleColumn == false
+                            })
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(id = R.drawable.baseline_1_column),
+                        contentDescription = "accesibilidad",
+                        modifier = Modifier
+                            .padding(end = 20.dp)
+                            .size(40.dp)
+                            .clickable(onClick = {
+                                singleColumn == true
+                            })
+                    )
+                }
+
+            }
+        }
+    )
+}
+
+@Composable
+fun GalleryContent(
+    paddingValues: PaddingValues,
+    isSingleColumn: MutableState<Boolean>,
+    artworks: List<Artwork>
+) {
+    LazyVerticalGrid(
+        // Cambia entre una o dos columnas
+        columns = if (isSingleColumn.value) GridCells.Fixed(1) else GridCells.Fixed(2),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0.1f, 0.1f, 0.1f, 0.9f))
+            .padding(paddingValues)
+    ) {
+        items(
+            count = artworks.size, // Número de elementos en la lista
+            key = { index -> artworks[index].name } // Clave única para cada obra
+        ) { index ->
+            val artwork = artworks[index] // Obtener la obra actual
+//            ArtworkCard(artwork)
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -201,7 +355,7 @@ fun ToolBar() {
                     modifier = Modifier
                         .clickable {
                             val webIntent = Intent(Intent.ACTION_VIEW).apply {
-                                data = Uri.parse("https://www.google.com") // La URL que se quiere abrir
+                                data = Uri.parse("https://www.google.com")
                             }
 
                             // Iniciar el intent para abrir el navegador
@@ -218,11 +372,19 @@ fun ToolBar() {
                             val shareIntent = Intent(Intent.ACTION_SEND).apply {
                                 type = "text/plain" // Tipo de dato que se va a compartir
                                 putExtra(Intent.EXTRA_SUBJECT, "Mira mi sitio web")
-                                putExtra(Intent.EXTRA_TEXT, "https://www.misitio.com") // El contenido a compartir
+                                putExtra(
+                                    Intent.EXTRA_TEXT,
+                                    "https://www.misitio.com"
+                                ) // El contenido a compartir
                             }
 
                             // Crear un chooser para mostrar las opciones disponibles de aplicaciones para compartir
-                            context.startActivity(Intent.createChooser(shareIntent, "Compartir con"))
+                            context.startActivity(
+                                Intent.createChooser(
+                                    shareIntent,
+                                    "Compartir con"
+                                )
+                            )
                         })
                 )
 
@@ -262,7 +424,10 @@ fun BottomBar() {
                 .clickable(onClick = {
                     val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
                         data = Uri.parse("mailto:") // Solo abre aplicaciones de correo
-                        putExtra(Intent.EXTRA_EMAIL, arrayOf("ejemplo@correo.com")) // Correo destinatario
+                        putExtra(
+                            Intent.EXTRA_EMAIL,
+                            arrayOf("ejemplo@correo.com")
+                        ) // Correo destinatario
                         putExtra(Intent.EXTRA_SUBJECT, "Asunto del correo") // Asunto del correo
                     }
 
