@@ -356,7 +356,7 @@ fun Headers() {
             painter = painterResource(id = R.drawable.img_1),
             contentDescription = "default",
             modifier = Modifier
-                .size(140.dp)
+                .size(200.dp)
                 .clip(CircleShape)
                 .border(
                     BorderStroke(3.dp, Color.Gray),
