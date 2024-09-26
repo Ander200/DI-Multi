@@ -1,5 +1,6 @@
 package com.example.myfirstapplication
 
+import android.content.ClipData.Item
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -16,6 +17,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,6 +26,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Face
@@ -60,7 +63,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.myfirstapplication.ui.theme.MyFirstApplicationTheme
 import kotlinx.coroutines.launch
 
@@ -127,12 +134,52 @@ fun BottomNavBar(navController: NavHostController) {
 @Preview
 @Composable
 fun ViewApp() {
+    val navController = rememberNavController()
     Scaffold (
         topBar =  {ToolBar()},
-        content = {Content()},
         floatingActionButton = {LikesBtn()},
         floatingActionButtonPosition = FabPosition.End,
-        bottomBar =  { BottomBar() },
+        bottomBar =  { BottomNavBar(navController) },
+    ) {
+        innerPadding ->
+            NavHost(navController = navController, startDestination = "info") {
+                composable("home") { HomeScreen(innerPadding, navController) }
+                composable("info") { InfoScreen(innerPadding, navController) }
+                composable("gallery") { GalleryScreen(innerPadding, navController) }
+                composable("settings") { SettingsScreen(innerPadding, navController) }
+            }
+    }
+}
+
+@Composable
+fun HomeScreen(innerPadding: PaddingValues, navController: NavController) {
+    Text(
+        modifier = Modifier
+            .padding(innerPadding),
+        text = "Home"
+    )
+}
+
+@Composable
+fun InfoScreen(innerPadding: PaddingValues, navController: NavController) {
+    Content(innerPadding)
+}
+
+@Composable
+fun GalleryScreen(innerPadding: PaddingValues, navController: NavController) {
+    Text(
+        modifier = Modifier
+            .padding(innerPadding),
+        text = "Gallery"
+    )
+}
+
+@Composable
+fun SettingsScreen(innerPadding: PaddingValues, navController: NavController) {
+    Text(
+        modifier = Modifier
+            .padding(innerPadding),
+        text = "Settings"
     )
 }
 
@@ -230,11 +277,16 @@ fun BottomBar() {
 
 //@Preview
 @Composable
-fun Content() {
-    Column {
-        Headers()
-        Menu()
-        Foot()
+fun Content(innerPadding: PaddingValues) {
+    LazyColumn(
+        modifier = Modifier
+            .padding(innerPadding)
+    ) {
+        item {
+            Headers()
+            Menu()
+            Foot()
+        }
     }
 }
 
