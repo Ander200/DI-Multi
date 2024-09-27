@@ -167,25 +167,25 @@ fun BottomNavBar(navController: NavHostController) {
 @Composable
 fun ViewApp() {
     val navController = rememberNavController()
-    val galleryViewModel : GalleryViewModel = viewModel()
-    navController.currentBackStackEntryAsState().value?.destination
-    Scaffold (
-        topBar = {when(navController.currentDestination?.route) {
-                    "gallery" -> GalleryTopBar(galleryViewModel.isSingleColumn.value)
-                    else -> ToolBar()
-                }}
-        ,
-        floatingActionButton = {LikesBtn()},
-        floatingActionButtonPosition = FabPosition.End,
-        bottomBar =  { BottomNavBar(navController) },
-    ) {
-        innerPadding ->
-            NavHost(navController = navController, startDestination = "info") {
-                composable("home") { HomeScreen(innerPadding, navController) }
-                composable("info") { InfoScreen(innerPadding, navController) }
-                composable("gallery") { GalleryScreen(innerPadding, navController, galleryViewModel) }
-                composable("settings") { SettingsScreen(innerPadding, navController) }
+    val galleryViewModel: GalleryViewModel = viewModel()
+    val actualView = navController.currentBackStackEntryAsState().value?.destination?.route
+    Scaffold(
+        topBar = {
+            when (actualView) {
+                "gallery" -> GalleryTopBar(galleryViewModel.isSingleColumn)
+                else -> ToolBar()
             }
+        },
+        floatingActionButton = { LikesBtn() },
+        floatingActionButtonPosition = FabPosition.End,
+        bottomBar = { BottomNavBar(navController) },
+    ) { innerPadding ->
+        NavHost(navController = navController, startDestination = "info") {
+            composable("home") { HomeScreen(innerPadding, navController) }
+            composable("info") { InfoScreen(innerPadding, navController) }
+            composable("gallery") { GalleryScreen(innerPadding, navController, galleryViewModel) }
+            composable("settings") { SettingsScreen(innerPadding, navController) }
+        }
     }
 }
 
@@ -211,7 +211,11 @@ fun InfoScreen(innerPadding: PaddingValues, navController: NavController) {
 }
 
 @Composable
-fun GalleryScreen(innerPadding: PaddingValues, navController: NavController, galleryViewModel : GalleryViewModel) {
+fun GalleryScreen(
+    innerPadding: PaddingValues,
+    navController: NavController,
+    galleryViewModel: GalleryViewModel
+) {
     GalleryContent(innerPadding, galleryViewModel.isSingleColumn, galleryViewModel.artworks.value)
 }
 
@@ -231,38 +235,54 @@ fun SettingsScreen(innerPadding: PaddingValues, navController: NavController) {
     }
 }
 
-fun sampleArtworks() : List<Artwork>{
+fun sampleArtworks(): List<Artwork> {
     return listOf(
         Artwork(
-            name = "test1",
-            title = "title",
-            description = "",
-            creationDate = "",
+            name = "Code",
+            title = "Programadores Comentado el Codigo",
+            description = "Programadores Comentado el Codigo",
+            creationDate = "27/09/2024",
             style = ArtworkStyle.WATERCOLOUR,
-            imageResId = 1
+            imageResId = R.drawable.img_galery_1
         ),
         Artwork(
-            name = "test2",
-            title = "title2",
-            description = "",
-            creationDate = "",
+            name = "Saul 1",
+            title = "Saul Ink",
+            description = "Saul Goodman",
+            creationDate = "27/09/2024",
             style = ArtworkStyle.INK,
-            imageResId = 1
+            imageResId = R.drawable.img_galery_2
         ),
         Artwork(
-            name = "test3",
-            title = "title3",
-            description = "",
-            creationDate = "",
+            name = "Universo 1",
+            title = "Universo 1",
+            description = "Universe",
+            creationDate = "27/09/2024",
             style = ArtworkStyle.DIGITAL,
-            imageResId = 1
+            imageResId = R.drawable.img_galery_3
+        ),
+        Artwork(
+            name = "Saul 2",
+            title = "Saul Watercolor",
+            description = "Saul Goodman",
+            creationDate = "27/09/2024",
+            style = ArtworkStyle.WATERCOLOUR,
+            imageResId = R.drawable.img_galery_2
+        ),
+        Artwork(
+            name = "Universo 2",
+            title = "Universo 2",
+            description = "Universe",
+            creationDate = "27/09/2024",
+            style = ArtworkStyle.INK,
+            imageResId = R.drawable.img_galery_3
         )
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GalleryTopBar(singleColumn: Boolean) {
+fun GalleryTopBar(singleColumn: MutableState<Boolean>) {
     val context = LocalContext.current
     TopAppBar(
         title = {
@@ -284,30 +304,22 @@ fun GalleryTopBar(singleColumn: Boolean) {
                             context.startActivity(webIntent)
                         }
                 )
-                if (singleColumn == true) {
-                    Image(
-                        painter = painterResource(id = R.drawable.baseline_2_columns),
-                        contentDescription = "accesibilidad",
-                        modifier = Modifier
-                            .padding(end = 20.dp)
-                            .size(40.dp)
-                            .clickable(onClick = {
-                                singleColumn == false
-                            })
-                    )
-                } else {
-                    Image(
-                        painter = painterResource(id = R.drawable.baseline_1_column),
-                        contentDescription = "accesibilidad",
-                        modifier = Modifier
-                            .padding(end = 20.dp)
-                            .size(40.dp)
-                            .clickable(onClick = {
-                                singleColumn == true
-                            })
-                    )
-                }
-
+                Image(
+                    painter = painterResource(
+                        id = if (singleColumn.value) {
+                            R.drawable.baseline_2_columns
+                        } else {
+                            R.drawable.baseline_1_column
+                        }
+                    ),
+                    contentDescription = "accesibilidad",
+                    modifier = Modifier
+                        .padding(end = 20.dp)
+                        .size(40.dp)
+                        .clickable(onClick = {
+                            singleColumn.value = !singleColumn.value
+                        })
+                )
             }
         }
     )
@@ -332,13 +344,101 @@ fun GalleryContent(
             key = { index -> artworks[index].name } // Clave única para cada obra
         ) { index ->
             val artwork = artworks[index] // Obtener la obra actual
-//            ArtworkCard(artwork)
+            ArtworkCard(artwork)
+        }
+    }
+}
+
+@Composable
+fun ArtworkCard(artwork: Artwork) {
+
+    // Selección del ícono según el estilo de la obra
+    val iconResId = when (artwork.style) {
+        ArtworkStyle.WATERCOLOUR -> R.drawable.outline_palette_24
+        ArtworkStyle.DIGITAL -> R.drawable.outline_video_stable_24
+        ArtworkStyle.INK -> R.drawable.baseline_local_drink_24
+    }
+
+    Box(
+        modifier = Modifier
+            .padding(6.dp) // Padding alrededor de la tarjeta
+            .shadow(8.dp, RoundedCornerShape(16.dp)) // Sombra con bordes redondeados
+            .background(Color.White, RoundedCornerShape(16.dp)) // Fondo blanco y bordes redondeados
+            .border(2.dp, Color.Yellow, RoundedCornerShape(16.dp)) // Borde fino
+            .fillMaxWidth() // Ajustar el tamaño de la tarjeta
+    ) {
+        Column () {
+            // Contenedor para superponer el icono sobre la imagen
+            Box {
+                // Imagen de la obra de arte
+                Image(
+                    painter = painterResource(id = artwork.imageResId),
+                    contentDescription = "Imagen de la obra de arte",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth() // Llenar el ancho
+                        .aspectRatio(1f) // Relación de aspecto 1:1 para que sea cuadrada
+                        .clip(RoundedCornerShape(16.dp)) // Redondear la imagen
+                )
+
+                // Fondo para el icono (recuadro gris oscuro)
+                Box(
+                    modifier = Modifier
+                        .size(36.dp) // Tamaño del recuadro
+                        .background(Color(0xFF2C2C2C), RoundedCornerShape(8.dp)) // Color gris oscuro con bordes redondeados
+                        .align(Alignment.TopEnd) // Alinear en la esquina superior derecha
+                        .padding(8.dp) // Padding para ajustar la posición
+                ) {
+
+                    // Icono superpuesto
+                    Icon(
+                        painter = painterResource(id = iconResId),
+                        contentDescription = "Icono del estilo de la obra de arte",
+                        modifier = Modifier
+                            .size(24.dp) // Tamaño del icono
+                            .align(Alignment.Center), // Centrar el icono dentro del recuadro
+                        tint = Color.White // Color del icono
+                    )
+                }
+            }
+
+            // Fondo para el titulo y la fecha
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth() // Llenar el ancho
+                    .background(Color(0xFF2C2C2C)) // Color gris oscuro con bordes redondeados
+                    .padding(8.dp) // Padding para ajustar la posición
+            ) {
+                // Título de la obra de arte
+                Text(
+                    text = artwork.title,
+                    style = MaterialTheme.typography.bodyLarge, // Usando la fuente EB Garamond definida en el tema
+                    fontSize = 18.sp,
+                    modifier = Modifier
+                        .padding(8.dp), // Padding alrededor del título
+                    color = Color.White // Color del texto
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth() // Llenar el ancho
+                    .background(Color(0xFF2C2C2C)) // Color gris oscuro con bordes redondeados
+                    .padding(2.dp) // Padding para ajustar la posición
+            ) {
+                // Fecha de la obra de arte
+                Text(
+                    text = artwork.creationDate,
+                    fontSize = 14.sp,
+                    modifier = Modifier
+                        .padding(6.dp), // Padding alrededor de la fecha
+                    color = Color.Gray // Color del texto
+                )
+            }
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-//@Preview
 @Composable
 fun ToolBar() {
     val context = LocalContext.current
@@ -393,13 +493,12 @@ fun ToolBar() {
     )
 }
 
-//@Preview
 @Composable
 fun LikesBtn() {
     val context = LocalContext.current
     FloatingActionButton(onClick = {
-        Toast.makeText(context,"Me gusta",Toast.LENGTH_SHORT).show()
-    }){
+        Toast.makeText(context, "Me gusta", Toast.LENGTH_SHORT).show()
+    }) {
         Text(
             text = "+",
             fontSize = 40.sp
@@ -407,40 +506,6 @@ fun LikesBtn() {
     }
 }
 
-//@Preview
-@Composable
-fun BottomBar() {
-    val context = LocalContext.current
-    BottomAppBar(
-        containerColor = MaterialTheme.colorScheme.primaryContainer,
-        contentColor = MaterialTheme.colorScheme.primary,
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.baseline_mail_24),
-            contentDescription = "accesibilidad",
-            modifier = Modifier
-                .padding(end = 5.dp)
-                .size(40.dp)
-                .clickable(onClick = {
-                    val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
-                        data = Uri.parse("mailto:") // Solo abre aplicaciones de correo
-                        putExtra(
-                            Intent.EXTRA_EMAIL,
-                            arrayOf("ejemplo@correo.com")
-                        ) // Correo destinatario
-                        putExtra(Intent.EXTRA_SUBJECT, "Asunto del correo") // Asunto del correo
-                    }
-
-                    // Iniciar el intent
-                    if (emailIntent.resolveActivity(context.packageManager) != null) {
-                        context.startActivity(emailIntent)
-                    }
-                })
-        )
-    }
-}
-
-//@Preview
 @Composable
 fun Content(innerPadding: PaddingValues) {
     LazyColumn(
@@ -457,7 +522,7 @@ fun Content(innerPadding: PaddingValues) {
 
 @Composable
 fun Option(name: String, image: Int) {
-    Row (
+    Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
@@ -483,12 +548,6 @@ fun Option(name: String, image: Int) {
     }
 }
 
-//@Preview
-@Composable
-fun OptionPreview() {
-    Option(name = "Test", image = R.drawable.baseline_accessibility_24)
-}
-
 @Composable
 fun Menu() {
     Column {
@@ -498,15 +557,9 @@ fun Menu() {
     }
 }
 
-//@Preview(name = "columna")
-@Composable
-fun MenuPreview() {
-    Menu()
-}
-
 @Composable
 fun Headers() {
-    Column (
+    Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -548,15 +601,9 @@ fun Headers() {
     }
 }
 
-//@Preview
-@Composable
-fun HeaderPreview() {
-    Headers()
-}
-
 @Composable
 fun Foot() {
-    Row (
+    Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
         modifier = Modifier
             .fillMaxWidth()
@@ -599,10 +646,4 @@ fun Foot() {
                 )
         )
     }
-}
-
-//@Preview
-@Composable
-fun FootPreview() {
-    Foot()
 }
