@@ -16,6 +16,7 @@ import com.example.myfirstapplication.components.BottomNavBar
 import com.example.myfirstapplication.components.GalleryTopBar
 import com.example.myfirstapplication.components.LikesBtn
 import com.example.myfirstapplication.components.ToolBar
+import com.example.myfirstapplication.viewModels.ContadorViewModel
 import com.example.myfirstapplication.viewModels.GalleryViewModel
 import com.example.myfirstapplication.views.GalleryScreen
 import com.example.myfirstapplication.views.HomeScreen
@@ -35,6 +36,7 @@ class MainActivity : ComponentActivity() {
 @Preview
 @Composable
 fun ViewApp() {
+    val contador = ContadorViewModel()
     val navController = rememberNavController()
     val galleryViewModel = GalleryViewModel()
     val actualView = navController.currentBackStackEntryAsState().value?.destination?.route
@@ -50,7 +52,7 @@ fun ViewApp() {
         bottomBar = { BottomNavBar(navController) },
     ) { innerPadding ->
         NavHost(navController = navController, startDestination = "info") {
-            composable("home") { HomeScreen(innerPadding, navController) }
+            composable("home") { HomeScreen(innerPadding, navController, contador) }
             composable("info") { InfoScreen(innerPadding, navController) }
             composable("gallery") { GalleryScreen(innerPadding, navController, galleryViewModel) }
             composable("settings") { SettingsScreen(innerPadding, navController) }
