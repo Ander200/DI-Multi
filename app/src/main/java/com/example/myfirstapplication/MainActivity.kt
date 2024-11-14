@@ -52,10 +52,10 @@ fun ViewApp() {
         bottomBar = { BottomNavBar(navController) },
     ) { innerPadding ->
         NavHost(navController = navController, startDestination = "info") {
-            composable("home") { HomeScreen(innerPadding, navController, contador) }
-            composable("info") { InfoScreen(innerPadding, navController) }
-            composable("gallery") { GalleryScreen(innerPadding, navController, galleryViewModel) }
-            composable("settings") { SettingsScreen(innerPadding, navController) }
+            composable("home") { HomeScreen(innerPadding, contador) }
+            composable("info") { InfoScreen(innerPadding) }
+            composable("gallery") { GalleryScreen(innerPadding, galleryViewModel) }
+            composable("settings") { SettingsScreen(innerPadding) }
         }
     }
 }

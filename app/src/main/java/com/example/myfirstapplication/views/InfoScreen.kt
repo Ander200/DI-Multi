@@ -25,11 +25,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.example.myfirstapplication.R
 
 @Composable
-fun InfoScreen(innerPadding: PaddingValues, navController: NavController) {
+fun InfoScreen(innerPadding: PaddingValues) {
     LazyColumn(
         modifier = Modifier
             .padding(innerPadding)
@@ -61,7 +60,7 @@ fun Option(name: String, image: Int) {
                 .size(40.dp)
         )
         Text(
-            text = "$name",
+            text = name,
             color = Color.White,
             fontSize = 26.sp,
             modifier = Modifier

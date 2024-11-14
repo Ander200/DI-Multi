@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.navigation.NavController
 import com.example.myfirstapplication.R
 import com.example.myfirstapplication.components.ArtworkCard
 import com.example.myfirstapplication.models.Artwork
@@ -20,7 +19,6 @@ import com.example.myfirstapplication.viewModels.GalleryViewModel
 @Composable
 fun GalleryScreen(
     innerPadding: PaddingValues,
-    navController: NavController,
     galleryViewModel: GalleryViewModel
 ) {
     GalleryContent(innerPadding, galleryViewModel.isSingleColumn, galleryViewModel.artworks.value)
